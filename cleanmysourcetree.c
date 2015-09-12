@@ -96,11 +96,7 @@ static void add_files_recursive(const char *current_path) {
       continue;
 
     char file_path[strlen(current_path) + 1 + strlen(entry.d_name) + 1];
-    if (strcmp(current_path, ".") == 0) {
-      strcpy(file_path, entry.d_name);
-    } else {
-      sprintf(file_path, "%s/%s", current_path, entry.d_name);
-    }
+    sprintf(file_path, "%s/%s", current_path, entry.d_name);
 
     struct stat st;
     if (lstat(file_path, &st))
