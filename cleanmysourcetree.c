@@ -81,7 +81,7 @@ static void add_dir(const char *dir_path) {
 }
 
 static void add_files_recursive(const char *current_path) {
-  DIR *d = opendir((current_path[0] == '\0') ? "." : current_path);
+  DIR *d = opendir(current_path);
   if (d == NULL)
     err(1, "unable to open directory '%s'", current_path);
 
@@ -91,12 +91,12 @@ static void add_files_recursive(const char *current_path) {
     if (readdir_r(d, &entry, &r_entry))
       errx(1, "readdir_r failed");
     if (r_entry == NULL)
-      return;
+      break;
     if (strcmp(entry.d_name, ".") == 0 || strcmp(entry.d_name, "..") == 0)
       continue;
 
     char file_path[strlen(current_path) + 1 + strlen(entry.d_name) + 1];
-    if (current_path[0] == '\0') {
+    if (strcmp(current_path, ".") == 0) {
       strcpy(file_path, entry.d_name);
     } else {
       sprintf(file_path, "%s/%s", current_path, entry.d_name);
@@ -113,12 +113,12 @@ static void add_files_recursive(const char *current_path) {
         // First recurse, then add the watch. This avoids spamming ourselves with irrelevant
         // directory open events.
         add_files_recursive(file_path);
-        add_dir(file_path);
         break;
       default:
         break;
     }
   }
+  add_dir(current_path);
 }
 
 volatile bool child_quit = false;
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
   inotify_fd = inotify_init1(IN_CLOEXEC | IN_NONBLOCK);
   if (inotify_fd == -1)
     err(1, "unable to open inotify fd");
-  add_files_recursive("");
+  add_files_recursive(".");
 
   sigset_t sigchild_mask;
   sigemptyset(&sigchild_mask);
