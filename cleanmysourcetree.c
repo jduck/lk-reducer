@@ -115,6 +115,7 @@ static void add_files_recursive(const char *current_path) {
     }
   }
   add_dir(current_path);
+  closedir(d);
 }
 
 volatile bool child_quit = false;
