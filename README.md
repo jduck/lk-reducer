@@ -49,18 +49,19 @@ $ make mrproper
 Exiting will transfer control back to the reducer, which will proceed to
 generate a file containing all of the files and their statuses in
 "lk-reducer.out". You can use this file to then do further manipulations to
-the source tree.
+the source tree. The possible statuses are **A**ccessed, **U**ntouched, or
+**G**enerated.
 
 You could delete all the unaccessed files and directories:
 
 ```
-$ grep ^N lk-reducer.out | (while read F; do rm -vf "$F"; done)
+$ grep ^U lk-reducer.out | (while read F; do rm -vf "$F"; done)
 ```
 
 You could copy all of the essential files and directories to a new location:
 
 ```
-$ grep ^Y lk-reducer.out | cut -c 2- > lk-reducer-needed.out
+$ grep ^A lk-reducer.out | cut -c 2- > lk-reducer-needed.out
 $ tar cf - -T lk-reducer-needed.out | tar xf - -C ../msm-reduced/
 ```
 

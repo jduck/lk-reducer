@@ -16,16 +16,16 @@
 #include <sys/prctl.h>
 #include <uthash.h>
 
-enum delstate {
-  DELSTATE_NO, /* source file that was accessed, keep it */
-  DELSTATE_MAYBE, /* source file that was not touched so far, delete it if it stays unused */
-  DELSTATE_YES /* generated file in a run with delete_new = true, delete it */
+enum filestate {
+  FSTATE_ACCESSED,
+  FSTATE_UNTOUCHED,
+  FSTATE_GENERATED
 };
 
 // describes a file or a directory that was created during compilation
 typedef struct {
   UT_hash_handle hh;
-  enum delstate delstate;
+  enum filestate state;
   char name[]; /* path relative to project root; hashmap key */
 } file;
 file *hashed_files = NULL;
@@ -57,7 +57,7 @@ static void add_file(const char *file_path) {
 
   f = xmalloc(sizeof(*f) + strlen(file_path) + 1);
   strcpy(f->name, file_path);
-  f->delstate = DELSTATE_MAYBE;
+  f->state = FSTATE_UNTOUCHED;
   HASH_ADD_STR(hashed_files, name, f);
 }
 
@@ -128,26 +128,17 @@ void handle_sigchld(int n) {
 }
 
 void usage(void) {
-  puts("invocation: cleanmysourcetree <deletenew/keepnew> [<target directory>]");
-  puts("deletenew will cause files and directories created by "
-    "the compilation process to be deleted.");
+  puts("invocation: lk-reducer [<target directory>]");
   exit(1);
 }
 
 int main(int argc, char **argv) {
-  bool delete_new;
-
-  if (argc == 3) {
-    if (chdir(argv[2]))
+  if (argc == 2) {
+    if (strcmp(argv[1], "-h") == 0)
+      usage();
+    if (chdir(argv[1]))
       err(1, "unable to chdir to specified directory");
-  } else if (argc != 2) {
-    usage();
-  }
-  if (strcmp(argv[1], "deletenew") == 0) {
-    delete_new = true;
-  } else if (strcmp(argv[1], "keepnew") == 0) {
-    delete_new = false;
-  } else {
+  } else if (argc < 1 || argc > 2) {
     usage();
   }
 
@@ -173,7 +164,8 @@ int main(int argc, char **argv) {
     puts("dropping you into an interactive shell now. compile the project, then "
       "exit the shell.");
     // uhhh... yeah.
-    system("$SHELL");
+    if (system("$SHELL") == -1)
+    err(1, "failed to execute a sub-shell");
     exit(0);
   }
 
@@ -214,12 +206,12 @@ int main(int argc, char **argv) {
         // if f is NULL, this is a file/directory generated during compilation
         // or a pre-existing directory
         if (f != NULL) {
-          if (f->delstate == DELSTATE_MAYBE)
-            f->delstate = DELSTATE_NO;
-        } else if (delete_new && (e->mask & (IN_CREATE | IN_MOVED_TO))) {
+          if (f->state == FSTATE_UNTOUCHED)
+            f->state = FSTATE_ACCESSED;
+        } else if (e->mask & (IN_CREATE | IN_MOVED_TO)) {
           f = xmalloc(sizeof(*f) + strlen(path) + 1);
           strcpy(f->name, path);
-          f->delstate = DELSTATE_YES;
+          f->state = FSTATE_GENERATED;
           HASH_ADD_STR(hashed_files, name, f);
         }
       }
@@ -236,18 +228,17 @@ int main(int argc, char **argv) {
   close(inotify_fd);
   puts("inotify event collection phase is over, dumping results to \"lk-reducer.out\"...");
 
-  // if we want to delete generated files and folders, we haven't seen
-  // any events for files in generated folders. therefore, to delete
-  // those folders, they need to be rm -rf'ed. I don't want to write
-  // logic for that manually, so just execute rm.
-  FILE of = fopen("lk-reducer.out", "w");
+  // output all of the files with their state
+  FILE *of = fopen("lk-reducer.out", "w");
   for (file *f = hashed_files; f != NULL; f = f->hh.next) {
-    if (f->delstate == DELSTATE_NO)
-		fprintf(of, "Y %s\n", f->name);
-	else if (f->delstate == DELSTATE_YES)
-		fprintf(of, "N %s\n", f->name);
-	else
-		fprintf(of, "? %s\n", f->name);
+    if (f->state == FSTATE_ACCESSED)
+      fprintf(of, "A %s\n", f->name);
+    else if (f->state == FSTATE_GENERATED)
+      fprintf(of, "G %s\n", f->name);
+    else if (f->state == FSTATE_UNTOUCHED)
+      fprintf(of, "U %s\n", f->name);
+    else
+      fprintf(of, "? %s\n", f->name);
   }
   fclose(of);
   puts("cleanup complete");
