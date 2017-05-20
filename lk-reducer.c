@@ -234,25 +234,22 @@ int main(int argc, char **argv) {
     err(1, "sigprocmask failed");
 
   close(inotify_fd);
-  puts("inotify event collection phase is over, deleting stuff...");
+  puts("inotify event collection phase is over, dumping results to \"lk-reducer.out\"...");
 
   // if we want to delete generated files and folders, we haven't seen
   // any events for files in generated folders. therefore, to delete
   // those folders, they need to be rm -rf'ed. I don't want to write
   // logic for that manually, so just execute rm.
+  FILE of = fopen("lk-reducer.out", "w");
   for (file *f = hashed_files; f != NULL; f = f->hh.next) {
-    if (f->delstate == DELSTATE_NO) continue;
-
-    pid_t rm_pid = fork();
-    if (rm_pid == -1)
-      err(1, "unable to fork for rm");
-    if (rm_pid == 0) {
-      execlp("rm", "rm", "-rfv", "--", f->name, NULL);
-      err(1, "unable to invoke rm");
-    }
-    if (wait(NULL) != rm_pid)
-      err(1, "waiting for rm failed");
+    if (f->delstate == DELSTATE_NO)
+		fprintf(of, "Y %s\n", f->name);
+	else if (f->delstate == DELSTATE_YES)
+		fprintf(of, "N %s\n", f->name);
+	else
+		fprintf(of, "? %s\n", f->name);
   }
+  fclose(of);
   puts("cleanup complete");
   return 0;
 }
