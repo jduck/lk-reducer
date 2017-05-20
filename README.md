@@ -55,14 +55,14 @@ the source tree. The possible statuses are **A**ccessed, **U**ntouched, or
 You could delete all the unaccessed files and directories:
 
 ```
-$ grep ^U lk-reducer.out | (while read F; do rm -vf "$F"; done)
+$ grep ^U lk-reducer.out | cut -c 3- | (while read F; do rm -vf "$F"; done)
 ```
 
 You could copy all of the essential files and directories to a new location:
 
 ```
-$ grep ^A lk-reducer.out | cut -c 2- > lk-reducer-needed.out
-$ tar cf - -T lk-reducer-needed.out | tar xf - -C ../msm-reduced/
+$ grep ^A lk-reducer.out | cut -c 3- > lk-reducer-keep.out
+$ tar cf - -T lk-reducer-keep.out | tar xf - -C ../msm-reduced/
 ```
 
 Authors
