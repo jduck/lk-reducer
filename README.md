@@ -2,7 +2,9 @@ This is a helper program to clean unused files from a project source directory.
 It's main purpose is for reducing the size of a Linux Kernel source tree.
 
 lk-reducer is based on "cleanmysourcetree" by Jann Horn. Original idea by
-Joshua J. Drake. This is represents the third implementation of this tool.
+Joshua J. Drake. This is a modified version of the second implementation of
+this tool. You can find the unmodified second implementation at
+https://git.thejh.net/?p=cleanmysourcetree.git
 
 Motiviation
 -----------
