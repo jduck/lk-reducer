@@ -44,7 +44,7 @@ the build and exit the sub-shell.
 
 ```
 dev:0:msm$ make marlin_defconfig
-dev:0:msm$ make
+dev:0:msm$ make -j$(NPROCS)
 dev:0:msm$ make mrproper
 ```
 
