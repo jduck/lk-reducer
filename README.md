@@ -21,6 +21,9 @@ modifications within a directory hierarchy. By watching which files are and are
 not accessed during a successful build, we can determine which files are
 unecessary and thus able to be removed.
 
+NOTE: inotify doesn't work well with symbolic links, so an extra step is needed
+to copy those.
+
 Dependencies
 ------------
 This code depends on the "uthash" library. You can install it via a package
@@ -64,10 +67,17 @@ You could copy all of the essential files and directories to a new location:
 
 ```console
 dev:0:msm$ grep ^A lk-reducer.out | cut -c 3- > lk-reducer-keep.out
-dev:0:msm$ cpio -pvdm ../msm-reduced/ < lk-reducer-keep.out
+dev:0:msm$ cpio -pdm ../msm-reduced/ < lk-reducer-keep.out
 dev:0:msm$ # Or, use tar if cpio isn't installed.
 dev:0:msm$ tar cf - -T lk-reducer-keep.out | tar xf - -C ../msm-reduced/
 ```
+
+As we said previously, symbolic links aren't handled properly, so you might want to copy those separately.
+
+```console
+dev:0:msm$ find . -type l -print | cpio -pdm ../msm-reduced/
+```
+
 
 Sample Use
 ----------
