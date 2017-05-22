@@ -64,7 +64,8 @@ You could copy all of the essential files and directories to a new location:
 
 ```
 dev:0:msm$ grep ^A lk-reducer.out | cut -c 3- > lk-reducer-keep.out
-dev:0:msm$ tar cf - -T lk-reducer-keep.out | tar xf - -C ../msm-reduced/
+dev:0:msm$ cpio -pvdm ../msm-reduced/ < lk-reducer-keep.out
+dev:0:msm$ # Or, use tar if cpio isn't installed.
 ```
 
 Sample Use
