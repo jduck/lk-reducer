@@ -33,7 +33,7 @@ To use this program, start by invoking it with the path to the linux kernel
 source you're planning to reduce.  If no target directory is given, it defaults
 to the current directory.
 
-```
+```bash
 dev:0:~$ lk-reducer /android/source/kernel/msm
 dev:0:msm$
 ```
@@ -42,7 +42,7 @@ After installing monitoring, it will spawn a fresh shell within the provided
 directory. Build the kernel as you would normally. After you're done, clean up
 the build and exit the sub-shell.
 
-```
+```bash
 dev:0:msm$ make marlin_defconfig
 dev:0:msm$ make -j$(NPROCS)
 dev:0:msm$ make mrproper
@@ -56,22 +56,23 @@ the source tree. The possible statuses are **A**ccessed, **U**ntouched, or
 
 You could delete all the unaccessed files and directories:
 
-```
+```bash
 dev:0:msm$ grep ^U lk-reducer.out | cut -c 3- | (while read F; do rm -vf "$F"; done)
 ```
 
 You could copy all of the essential files and directories to a new location:
 
-```
+```bash
 dev:0:msm$ grep ^A lk-reducer.out | cut -c 3- > lk-reducer-keep.out
-dev:0:msm$ tar cf - -T lk-reducer-keep.out | tar xf - -C ../msm-reduced/
+dev:0:msm$ cpio -pvdm ../msm-reduced/ < lk-reducer-keep.out
+dev:0:msm$ # Or, use tar if cpio isn't installed.
 ```
 
 Sample Use
 ----------
 This is what it looked like when we used it in practice:
 
-```
+```bash
 dev:0:msm$ du -hs --exclude .git .
 750M    .
 dev:0:msm$ lk-reducer
