@@ -129,4 +129,4 @@ dev:0:msm$ du -hs ../msm-marlin-reduced/
 
 Authors
 -------
-This project is a collaboration between Joshua J. Drake (@jduck) and Jann Horn (@TheJH).
+This project is a collaboration between Joshua J. Drake ([@jduck](https://github.com/jduck/)) and Jann Horn ([@TheJH](https://github.com/thejh/)).
