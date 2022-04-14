@@ -87,18 +87,19 @@ static void add_files_recursive(const char *current_path) {
   if (d == NULL)
     err(1, "unable to open directory '%s'", current_path);
 
-  struct dirent entry;
-  struct dirent *r_entry;
+  struct dirent *entry;
   while (1) {
-    if (readdir_r(d, &entry, &r_entry))
-      errx(1, "readdir_r failed");
-    if (r_entry == NULL)
+    errno = 0;
+    if (!(entry = readdir(d))) {
+      if (errno != 0)
+        errx(1, "readdir failed");
       break;
-    if (strcmp(entry.d_name, ".") == 0 || strcmp(entry.d_name, "..") == 0)
+    }
+    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
       continue;
 
-    char file_path[strlen(current_path) + 1 + strlen(entry.d_name) + 1];
-    sprintf(file_path, "%s/%s", current_path, entry.d_name);
+    char file_path[strlen(current_path) + 1 + strlen(entry->d_name) + 1];
+    sprintf(file_path, "%s/%s", current_path, entry->d_name);
 
     struct stat st;
     if (lstat(file_path, &st))
