@@ -6,7 +6,7 @@ Joshua J. Drake. This is a modified version of the second implementation of
 this tool. You can find the unmodified second implementation at
 https://git.thejh.net/?p=cleanmysourcetree.git
 
-Motiviation
+Motivation
 -----------
 The Linux Kernel has grown terribly bloated over the years. It contains
 hundreds of drivers and other code that are often not needed to build a single
@@ -19,7 +19,7 @@ How it Works
 This program uses the Linux *inotify* subsystem to monitor for accesses and
 modifications within a directory hierarchy. By watching which files are and are
 not accessed during a successful build, we can determine which files are
-unecessary and thus able to be removed.
+unnecessary and thus able to be removed.
 
 NOTE: inotify doesn't work well with symbolic links, so an extra step is needed
 to copy those.
@@ -32,10 +32,10 @@ repository at https://github.com/troydhanson/uthash
 
 Limitations
 -----------
-Modern Linux kenrels limit the amount of inotify watches that a user can use.
+Modern Linux kernels limit the amount of inotify watches that a user can use.
 If your attempt to run lk-reducer fails with an error indicating no more
 watches are allowed, you will need to increase the fs.inotify.max_user_watches
-kernel paramter.
+kernel parameter.
 
 ```console
 dev:0:~$ sudo sysctl fs.inotify.max_user_watches=16384
@@ -44,7 +44,7 @@ dev:0:~$
 
 Usage
 -----
-To use this program, start by invoking it with the path to the linux kernel
+To use this program, start by invoking it with the path to the Linux kernel
 source you're planning to reduce.  If no target directory is given, it defaults
 to the current directory.
 
@@ -69,7 +69,7 @@ generate a file containing all of the files and their statuses in
 the source tree. The possible statuses are **A**ccessed, **U**ntouched, or
 **G**enerated.
 
-You could delete all the unaccessed files and directories:
+You could delete all the untouched files and directories:
 
 ```console
 dev:0:msm$ grep ^U lk-reducer.out | cut -c 3- | xargs rm -vf "$F"
