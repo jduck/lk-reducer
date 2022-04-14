@@ -36,7 +36,7 @@ typedef struct {
   int watch_descriptor; /* hashmap key */
   char name[];
 } directory;
-file *hashed_dirs = NULL;
+directory *hashed_dirs = NULL;
 
 int inotify_fd = -1;
 

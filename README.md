@@ -60,7 +60,7 @@ the source tree. The possible statuses are **A**ccessed, **U**ntouched, or
 You could delete all the unaccessed files and directories:
 
 ```console
-dev:0:msm$ grep ^U lk-reducer.out | cut -c 3- | (while read F; do rm -vf "$F"; done)
+dev:0:msm$ grep ^U lk-reducer.out | cut -c 3- | xargs rm -vf "$F"
 ```
 
 You could copy all of the essential files and directories to a new location:
