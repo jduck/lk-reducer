@@ -39,6 +39,7 @@ typedef struct {
 directory *hashed_dirs = NULL;
 
 int inotify_fd = -1;
+unsigned long watch_cnt = 0;
 
 void *xmalloc(size_t len) {
   void *ret = malloc(len);
@@ -70,7 +71,8 @@ static void add_dir(const char *dir_path) {
   d->watch_descriptor = inotify_add_watch(inotify_fd, dir_path,
     IN_OPEN | IN_CREATE | IN_MOVED_TO | IN_EXCL_UNLINK | IN_ONLYDIR);
   if (d->watch_descriptor == -1)
-    err(1, "unable to add inotify watch for '%s'", dir_path);
+    err(1, "unable to add inotify watch for '%s' (after %lu)", dir_path, watch_cnt);
+  watch_cnt++;
 
   directory *d_existing;
   HASH_FIND_INT(hashed_dirs, &d->watch_descriptor, d_existing);

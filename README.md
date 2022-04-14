@@ -30,6 +30,18 @@ This code depends on the "uthash" library. You can install it via a package
 if your distribution has one (uthash-dev on Ubuntu) or from the original
 repository at https://github.com/troydhanson/uthash
 
+Limitations
+-----------
+Modern Linux kenrels limit the amount of inotify watches that a user can use.
+If your attempt to run lk-reducer fails with an error indicating no more
+watches are allowed, you will need to increase the fs.inotify.max_user_watches
+kernel paramter.
+
+```console
+dev:0:~$ sudo sysctl fs.inotify.max_user_watches=16384
+dev:0:~$
+```
+
 Usage
 -----
 To use this program, start by invoking it with the path to the linux kernel
