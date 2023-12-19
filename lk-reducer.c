@@ -70,8 +70,13 @@ static void add_dir(const char *dir_path) {
   // Instead, register watches on all directories. There shouldn't be too many of those.
   d->watch_descriptor = inotify_add_watch(inotify_fd, dir_path,
     IN_OPEN | IN_CREATE | IN_MOVED_TO | IN_EXCL_UNLINK | IN_ONLYDIR);
-  if (d->watch_descriptor == -1)
+  if (d->watch_descriptor == -1) {
+    if (errno == ENOSPC) {
+      // inotify returns ENOSPC when max user watches is reached. Help the user...
+      fprintf(stderr, "WARNING: You ran out of inotify watches. Did you check the README? Try: sudo sysctl fs.inotify.max_user_watches=16384\n");
+    }
     err(1, "unable to add inotify watch for '%s' (after %lu)", dir_path, watch_cnt);
+  }
   watch_cnt++;
 
   directory *d_existing;
