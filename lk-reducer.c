@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
         HASH_FIND_INT(hashed_dirs, &e->wd, dir);
         if (dir == NULL)
           errx(1, "unable to find dir by inotify wd, bug!");
-        char path[strlen(dir->name) + e->len];
+        char path[strlen(dir->name) + e->len + 2];
         sprintf(path, "%s/%s", dir->name, e->name);
         file *f;
         HASH_FIND_STR(hashed_files, path, f);
